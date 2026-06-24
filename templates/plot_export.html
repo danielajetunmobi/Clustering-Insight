@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ClusterInsight Plot - {{ payload.dataset.name }}</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f6f7f8; color: #17212b; }
+        main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        h1 { font-size: 24px; margin: 0 0 18px; }
+        .chart { min-height: 520px; background: #fff; border: 1px solid #d8dee4; border-radius: 8px; margin-bottom: 18px; }
+        .compact { min-height: 360px; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>{{ payload.dataset.name }}</h1>
+        <div id="scatterPlot" class="chart"></div>
+        <div id="distributionChart" class="chart compact"></div>
+        <div id="elbowChart" class="chart compact"></div>
+    </main>
+    <script id="analysis-data" type="application/json">{{ chart_json|safe }}</script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+        function renderClusterInsightCharts(data) {
+            if (!window.Plotly) return;
+            var points = data.points || [];
+            var clusters = Array.from(new Set(points.map(function (point) { return point.cluster; }))).sort();
+            var traces = clusters.map(function (cluster) {
+                var rows = points.filter(function (point) { return point.cluster === cluster && point.anomaly !== "anomaly"; });
+                return {
+                    x: rows.map(function (point) { return point.x; }),
+                    y: rows.map(function (point) { return point.y; }),
+                    text: rows.map(function (point) { return "Row " + point.row; }),
+                    mode: "markers",
+                    type: "scatter",
+                    name: "Cluster " + cluster,
+                    marker: { size: 10, line: { color: "#ffffff", width: 1 } },
+                    hovertemplate: "%{text}<br>x=%{x:.3f}<br>y=%{y:.3f}<extra>%{fullData.name}</extra>"
+                };
+            });
+            var anomalyRows = points.filter(function (point) { return point.anomaly === "anomaly"; });
+            if (anomalyRows.length) {
+                traces.push({
+                    x: anomalyRows.map(function (point) { return point.x; }),
+                    y: anomalyRows.map(function (point) { return point.y; }),
+                    text: anomalyRows.map(function (point) { return "Row " + point.row; }),
+                    mode: "markers",
+                    type: "scatter",
+                    name: "Anomaly",
+                    marker: { color: "#c2410c", size: 13, symbol: "x", line: { width: 2 } },
+                    hovertemplate: "%{text}<br>x=%{x:.3f}<br>y=%{y:.3f}<extra>Anomaly</extra>"
+                });
+            }
+            Plotly.newPlot("scatterPlot", traces, { margin: { t: 24, r: 20, b: 48, l: 56 }, xaxis: { title: "Component X" }, yaxis: { title: "Component Y" }, legend: { orientation: "h" } }, { responsive: true, displaylogo: false });
+
+            var distribution = data.distribution || [];
+            Plotly.newPlot("distributionChart", [{ x: distribution.map(function (item) { return item.label; }), y: distribution.map(function (item) { return item.count; }), type: "bar", marker: { color: "#0f766e" } }], { margin: { t: 24, r: 20, b: 48, l: 56 }, xaxis: { title: "Cluster" }, yaxis: { title: "Rows" } }, { responsive: true, displaylogo: false });
+
+            var elbow = data.elbow || [];
+            if (elbow.length) {
+                Plotly.newPlot("elbowChart", [{ x: elbow.map(function (item) { return item.k; }), y: elbow.map(function (item) { return item.inertia; }), type: "scatter", mode: "lines+markers", line: { color: "#2563eb", width: 3 }, marker: { size: 8 } }], { margin: { t: 24, r: 20, b: 48, l: 56 }, xaxis: { title: "K" }, yaxis: { title: "Inertia" } }, { responsive: true, displaylogo: false });
+            }
+        }
+        renderClusterInsightCharts(JSON.parse(document.getElementById("analysis-data").textContent));
+    </script>
+</body>
+</html>

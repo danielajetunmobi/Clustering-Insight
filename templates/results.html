@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Results - {{ payload.dataset.name }}{% endblock %}
+
+{% block content %}
+<section class="workspace-band">
+    <div class="container-fluid">
+        <div class="page-heading">
+            <div>
+                <p class="section-label">Analysis results</p>
+                <h1>{{ payload.dataset.name }}</h1>
+            </div>
+            <div class="heading-actions">
+                <a class="btn btn-outline-secondary" href="{{ url_for('index') }}">
+                    <i data-lucide="folder-open"></i>
+                    New Dataset
+                </a>
+                <a class="btn btn-outline-primary" href="{{ url_for('download_plot', run_id=payload.run_id) }}">
+                    <i data-lucide="file-code"></i>
+                    Plot HTML
+                </a>
+                <a class="btn btn-primary" href="{{ url_for('download_csv', run_id=payload.run_id) }}">
+                    <i data-lucide="download"></i>
+                    CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="metric-grid">
+            <div class="metric-tile">
+                <span>Rows</span>
+                <strong>{{ payload.metrics.rows }}</strong>
+            </div>
+            <div class="metric-tile">
+                <span>Features</span>
+                <strong>{{ payload.metrics.selected_columns }}</strong>
+            </div>
+            <div class="metric-tile">
+                <span>Clusters</span>
+                <strong>{{ payload.metrics.clusters }}</strong>
+            </div>
+            <div class="metric-tile">
+                <span>Anomalies</span>
+                <strong>{{ payload.metrics.anomalies }}</strong>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <section class="panel wide-panel chart-panel">
+                <div class="panel-title-row">
+                    <div>
+                        <h2>2D Cluster Map</h2>
+                        <p>{{ payload.reduction_info.method }} projection</p>
+                    </div>
+                    <i data-lucide="scatter-chart"></i>
+                </div>
+                <div id="scatterPlot" class="chart-box"></div>
+            </section>
+
+            <aside class="side-stack">
+                <section class="panel chart-panel">
+                    <div class="panel-title-row">
+                        <div>
+                            <h2>Distribution</h2>
+                            <p>{{ payload.cluster_info.method }}</p>
+                        </div>
+                        <i data-lucide="bar-chart-3"></i>
+                    </div>
+                    <div id="distributionChart" class="chart-box compact-chart"></div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-title-row">
+                        <div>
+                            <h2>Model Summary</h2>
+                            <p>Saved run {{ payload.run_id[:8] }}</p>
+                        </div>
+                        <i data-lucide="clipboard-list"></i>
+                    </div>
+                    <div class="key-list">
+                        {% for key, value in payload.cluster_info.items() %}
+                            <div><span>{{ key|replace('_', ' ')|title }}</span><strong>{{ value }}</strong></div>
+                        {% endfor %}
+                        <div><span>Reduction</span><strong>{{ payload.reduction_info.method }}</strong></div>
+                        <div><span>Anomaly</span><strong>{{ payload.anomaly_info.method }}</strong></div>
+                    </div>
+                </section>
+            </aside>
+        </div>
+
+        <section class="panel chart-panel">
+            <div class="panel-title-row">
+                <div>
+                    <h2>Elbow Method</h2>
+                    <p>K-Means inertia by cluster count</p>
+                </div>
+                <i data-lucide="line-chart"></i>
+            </div>
+            <div id="elbowChart" class="chart-box compact-chart"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-title-row">
+                <div>
+                    <h2>Result Preview</h2>
+                    <p>Cluster labels and exported columns</p>
+                </div>
+                <i data-lucide="table"></i>
+            </div>
+            <div class="table-scroll">{{ table_html|safe }}</div>
+        </section>
+    </div>
+</section>
+
+<script id="analysis-data" type="application/json">{{ chart_json|safe }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{{ url_for('static', filename='js/results.js') }}"></script>
+{% endblock %}

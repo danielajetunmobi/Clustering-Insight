@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze - {{ meta.name }}{% endblock %}
+
+{% block content %}
+<section class="workspace-band">
+    <div class="container-fluid">
+        <div class="page-heading">
+            <div>
+                <p class="section-label">Analysis setup</p>
+                <h1>{{ meta.name }}</h1>
+            </div>
+            <div class="heading-actions">
+                <a class="btn btn-outline-secondary" href="{{ url_for('preview', dataset_id=dataset_id) }}">
+                    <i data-lucide="arrow-left"></i>
+                    Preview
+                </a>
+            </div>
+        </div>
+
+        <form method="post" class="analysis-form">
+            <div class="content-grid">
+                <section class="panel wide-panel">
+                    <div class="panel-title-row">
+                        <div>
+                            <h2>Feature Columns</h2>
+                            <p>{{ numeric_columns|length }} numeric columns detected</p>
+                        </div>
+                        <i data-lucide="list-checks"></i>
+                    </div>
+                    <div class="checkbox-grid">
+                        {% for column in numeric_columns %}
+                            <label class="check-tile">
+                                <input type="checkbox" name="columns" value="{{ column }}" checked>
+                                <span>{{ column }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <aside class="side-stack">
+                    <section class="panel">
+                        <div class="panel-title-row">
+                            <div>
+                                <h2>Preprocessing</h2>
+                                <p>Missing values and scale</p>
+                            </div>
+                            <i data-lucide="settings-2"></i>
+                        </div>
+                        <label class="form-label" for="missing_strategy">Missing values</label>
+                        <select class="form-select" id="missing_strategy" name="missing_strategy">
+                            <option value="fill_mean" selected>Fill with mean</option>
+                            <option value="drop">Drop rows</option>
+                        </select>
+                        <label class="toggle-row mt-3">
+                            <input type="checkbox" name="scale" checked>
+                            <span>Feature scaling</span>
+                        </label>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-title-row">
+                            <div>
+                                <h2>Reduction</h2>
+                                <p>2D projection</p>
+                            </div>
+                            <i data-lucide="scatter-chart"></i>
+                        </div>
+                        <label class="form-label" for="reduction_method">Method</label>
+                        <select class="form-select" id="reduction_method" name="reduction_method">
+                            <option value="pca" selected>PCA</option>
+                            <option value="tsne">t-SNE</option>
+                        </select>
+                    </section>
+                </aside>
+            </div>
+
+            <div class="content-grid">
+                <section class="panel wide-panel">
+                    <div class="panel-title-row">
+                        <div>
+                            <h2>Clustering</h2>
+                            <p>K-Means, DBSCAN, or hierarchical clustering</p>
+                        </div>
+                        <i data-lucide="git-branch"></i>
+                    </div>
+                    <div class="control-grid">
+                        <div>
+                            <label class="form-label" for="cluster_method">Algorithm</label>
+                            <select class="form-select" id="cluster_method" name="cluster_method">
+                                <option value="kmeans" selected>K-Means</option>
+                                <option value="dbscan">DBSCAN</option>
+                                <option value="hierarchical">Hierarchical</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="n_clusters">Clusters</label>
+                            <input class="form-control" id="n_clusters" type="number" name="n_clusters" min="2" max="12" value="3">
+                        </div>
+                        <div>
+                            <label class="form-label" for="eps">DBSCAN eps</label>
+                            <input class="form-control" id="eps" type="number" name="eps" step="0.1" min="0.1" value="0.8">
+                        </div>
+                        <div>
+                            <label class="form-label" for="min_samples">DBSCAN min samples</label>
+                            <input class="form-control" id="min_samples" type="number" name="min_samples" min="2" max="30" value="5">
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="side-stack">
+                    <section class="panel">
+                        <div class="panel-title-row">
+                            <div>
+                                <h2>Anomaly Detection</h2>
+                                <p>Isolation Forest</p>
+                            </div>
+                            <i data-lucide="radar"></i>
+                        </div>
+                        <label class="toggle-row">
+                            <input type="checkbox" name="anomaly_enabled" checked>
+                            <span>Run anomaly detection</span>
+                        </label>
+                        <label class="form-label mt-3" for="contamination">Contamination</label>
+                        <input class="form-control" id="contamination" type="number" name="contamination" step="0.01" min="0.01" max="0.45" value="0.08">
+                    </section>
+
+                    <button class="btn btn-primary btn-action" type="submit">
+                        <i data-lucide="play"></i>
+                        Run Analysis
+                    </button>
+                </aside>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

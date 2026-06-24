@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - ClusterInsight{% endblock %}
+
+{% block content %}
+<section class="workspace-band">
+    <div class="container-fluid">
+        <div class="panel empty-panel">
+            <h1>{{ title }}</h1>
+            <p>{{ message }}</p>
+            <a class="btn btn-primary" href="{{ url_for('index') }}">
+                <i data-lucide="home"></i>
+                Home
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

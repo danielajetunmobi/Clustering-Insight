@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}ClusterInsight - Workspace{% endblock %}
+
+{% block content %}
+<section class="workspace-band">
+    <div class="container-fluid">
+        <div class="page-heading">
+            <div>
+                <p class="section-label">Unsupervised learning workspace</p>
+                <h1>ClusterInsight</h1>
+            </div>
+            <div class="heading-meta">CSV analysis with clustering, reduction, and anomaly detection</div>
+        </div>
+
+        <div class="workspace-grid">
+            <form class="panel upload-panel" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+                <div class="panel-title-row">
+                    <div>
+                        <h2>Upload Dataset</h2>
+                        <p>CSV files up to 16 MB</p>
+                    </div>
+                    <i data-lucide="upload-cloud"></i>
+                </div>
+                <label class="form-label" for="dataset">Dataset</label>
+                <input class="form-control form-control-lg" type="file" id="dataset" name="dataset" accept=".csv" required>
+                <button class="btn btn-primary btn-action" type="submit">
+                    <i data-lucide="arrow-right"></i>
+                    Continue
+                </button>
+            </form>
+
+            <section class="panel sample-panel">
+                <div class="panel-title-row">
+                    <div>
+                        <h2>Sample Datasets</h2>
+                        <p>Ready-to-run CSV files</p>
+                    </div>
+                    <i data-lucide="database"></i>
+                </div>
+                <div class="sample-list">
+                    {% for sample in samples %}
+                        <a class="sample-row" href="{{ url_for('load_sample', sample_key=sample.key) }}">
+                            <span>
+                                <strong>{{ sample.name }}</strong>
+                                <small>{{ sample.filename }}</small>
+                            </span>
+                            <i data-lucide="chevron-right"></i>
+                        </a>
+                    {% else %}
+                        <div class="empty-state">No sample datasets found.</div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+{% endblock %}
